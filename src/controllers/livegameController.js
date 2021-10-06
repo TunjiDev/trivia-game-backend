@@ -328,8 +328,8 @@ exports.gameZone = catchAsync(async (req, res, next) => {
             user.gameEnded = false;
             user.userFound = false;
             user.firstQuestion = false;
-            user.activeGames = [];
-            user.currentGame = [];
+            // user.activeGames = [];
+            // user.currentGame = [];
 
             await user.save();
     

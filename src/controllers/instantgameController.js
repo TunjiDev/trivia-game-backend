@@ -168,6 +168,7 @@ exports.gameZone = catchAsync(async (req, res, next) => {
             user.firstQuestion = false;
             user.questionsTimer = 0;
             // user.activeGames = [];
+            
             // user.currentGame = [];
 
             await user.save();

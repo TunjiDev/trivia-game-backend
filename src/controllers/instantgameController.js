@@ -155,32 +155,15 @@ exports.gameZone = catchAsync(async (req, res, next) => {
     });
 
     if (instantGame[0]) {
-        
         //INITIALIZING GAME
-        if (!user.gameInit && !user.gameEnded && user.userFound) {
+        if (!user.gameInit && !user.gameEnded) {
             user.currentQuestion = 0;
     
             user.gameInit = true;
+
+            await user.save();
     
-            user.previousQuestion = -1;
-            user.gameEnded = false;
-            user.userFound = false;
-            user.firstQuestion = false;
-            user.questionsTimer = 0;
-            // user.activeGames = [];
-            
-            // user.currentGame = [];
-
-            await user.save();
             console.log("2. Game Initialized");
-        }
-
-        if (!user.userFound) {
-            user.userFound = true;
-
-            await user.save();
-            console.log("1. User Found!");
-
             res.status(200).json({
                 status: "success",
                 message: "User Found!",
@@ -188,8 +171,9 @@ exports.gameZone = catchAsync(async (req, res, next) => {
             });
         }
         
+        
         //MOVING TO THE NEXT QUESTION
-        if (user.gameInit && !answer && !action && !user.gameEnded && user.firstQuestion && user.userFound) {
+        if (user.gameInit && !answer && !action && !user.gameEnded && user.firstQuestion) {
             if (!(instantGame[0].activePlayers.includes(user.id))) {
                 return next(new AppError("You have failed a question and no longer a participant in this game!", 400));
             }
@@ -198,14 +182,15 @@ exports.gameZone = catchAsync(async (req, res, next) => {
             
             await user.save();
             
-            // if (user.currentQuestion > 8) {
-            //     user.gameEnded = true;
+            if (user.currentQuestion > 8) {
+                user.gameEnded = true;
                 
-            //     await user.save();
-            // }
-            
+                await user.save();
+            }
         
             console.log("4. Moved to Next question");
+            // console.log(instantGame.questions);
+            // console.log(instantGame[0]);
             
             res.status(200).json({
                 status: "success",
@@ -216,11 +201,11 @@ exports.gameZone = catchAsync(async (req, res, next) => {
         }
         
         //GET THE QUESTIONS
-        if (user.gameInit && !answer && !action && user.currentQuestion > user.previousQuestion && !user.firstQuestion && !user.gameEnded && user.userFound) {
+        if (user.gameInit && !answer && !action && user.currentQuestion > user.previousQuestion && !user.firstQuestion && !user.gameEnded) {
             if (!(instantGame[0].activePlayers.includes(user.id))) {
                 return next(new AppError("You have failed a question and no longer a participant in this game!", 400));
             }
-
+        
             user.previousQuestion = user.previousQuestion + 1;
 
             user.firstQuestion = true;
@@ -228,6 +213,8 @@ exports.gameZone = catchAsync(async (req, res, next) => {
             await user.save();
         
             console.log("3. question returned");
+            // console.log(instantGame[0].questions);
+            // console.log(instantGame[0]);
 
             res.status(200).json({
                 status: "success",
@@ -243,7 +230,7 @@ exports.gameZone = catchAsync(async (req, res, next) => {
         }
         
         //SUBMITTING ANSWERS
-        if (user.gameInit && answer && !action && !user.gameEnded && user.userFound) {
+        if (user.gameInit && answer && !action && !user.gameEnded) {
             if (!(instantGame[0].activePlayers.includes(user.id))) {
                 return next(new AppError("You have failed a question and no longer a participant in this game!", 400));
             }
@@ -253,23 +240,23 @@ exports.gameZone = catchAsync(async (req, res, next) => {
                 const userIndex = instantGame[0].activePlayers.indexOf(user.id);
                 instantGame[0].activePlayers.splice(userIndex, 1);
                 await instantGame[0].save();
+                // console.log(instantGame[0]);
             }
         
             console.log("5. Answer submitted");
+            // console.log(instantGame[0].players);
         
-            // console.log(res.Body);
-            if (req.user.currentQuestion === 2) {
-                console.log("USER'S STUFF!");
-            }
+            console.log(res.Body);
             res.status(200).json({
                 status: "success",
+                // timer: user.questionsTimer,
                 message:
                 answer == instantGame[0].questions[user.currentQuestion].answer ? "Correct!" : "Wrong!",
             });
         }
 
         //IF EXTRALIFE OR ERASER IS BEING USED
-        if (user.gameInit && !answer && action && !user.gameEnded && user.userFound) {
+        if (user.gameInit && !answer && action && !user.gameEnded) {
 
             // Check if it's eraser that's being used
             if (user.erasers > 0 && action === "eraser") {
@@ -318,29 +305,29 @@ exports.gameZone = catchAsync(async (req, res, next) => {
         }
 
         //SPLIT THE MONEY(REWARD IN THE instantGame[0] MODEL) AMONGST THE REMAINING ACTIVE PARTICIPANTS
-        // if (user.gameEnded && user.gameInit && !answer && user.currentQuestion > 8 && user.currentQuestion > user.previousQuestion) {
-        //     if (!instantGame[0].activePlayers.includes(user.id)) {
-        //         return next(new AppError("You have failed a question and are no longer a participant in this game!", 400));
-        //     }
-        //     const moneyWon = (instantGame[0].stake * 2) / instantGame[0].activePlayers.length;
+        if (user.gameEnded && user.gameInit && !answer && user.currentQuestion > 8 && user.currentQuestion > user.previousQuestion) {
+            if (!instantGame[0].activePlayers.includes(user.id)) {
+                return next(new AppError("You have failed a question and are no longer a participant in this game!", 400));
+            }
+            const moneyWon = (instantGame[0].stake * 2) / instantGame[0].activePlayers.length;
         
-        //     user.earnings = user.earnings + moneyWon;
+            user.earnings = user.earnings + moneyWon;
 
-        //     //RESETTING THE USER STATE AND REMOVING THEM FROM THE instantGame[0] AFTER GAME HAS ENDED AND MONEY HAS BEEN SHARED
-        //     // user.currentQuestion = -1;
-        //     // user.previousQuestion = -1;
-        //     // user.gameEnded = false;
-        //     // user.gameInit = false;
+            //RESETTING THE USER STATE AND REMOVING THEM FROM THE instantGame[0] AFTER GAME HAS ENDED AND MONEY HAS BEEN SHARED
+            // user.currentQuestion = -1;
+            // user.previousQuestion = -1;
+            // user.gameEnded = false;
+            // user.gameInit = false;
         
-        //     await user.save();
-        //     // await instantGame[0].save();
+            await user.save();
+            // await instantGame[0].save();
         
-        //     console.log("9");
-        //     res.status(200).json({
-        //         status: "success",
-        //         message: `Congrats! You have won ₦${moneyWon} coins!!!`
-        //     });
-        // }
+            console.log("9");
+            res.status(200).json({
+                status: "success",
+                message: `Congrats! You have won ₦${moneyWon} coins!!!`
+            });
+        }
     } else {
         return next(new AppError('No player found yet...', 400));
     }

@@ -1,8 +1,9 @@
 const fs = require('fs');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
-dotenv.config({ path: '../../../config.env' });
-// const User = require('../../models/userModel');
+// dotenv.config({ path: '../../../config.env' });
+// dotenv.config({ path: './config.env' });
+dotenv.config({ path: './config.env' });
 const Question = require('../../models/questionModel');
 
 const DB = process.env.DATABASE.replace('<PASSWORD>', process.env.DATABASE_PASSWORD);
@@ -25,25 +26,22 @@ const connectToDb = async function() {
 connectToDb();
 
 //READ JSON FILE
-// const users = JSON.parse(fs.readFileSync(`${__dirname}/users.json`, 'utf8'));
 const questions = JSON.parse(fs.readFileSync(`${__dirname}/questions.json`, 'utf8'));
 
 //IMPORT DATA INTO DATABASE
 const importData = async () => {
     try {
-        // await User.create(users, {validateBeforeSave: false});
         await Question.create(questions, {validateBeforeSave: false});
         console.log('Data successfully loaded!');
     } catch (error) {
         console.log(error);
     }
-    process.exit(); //Stopping the application from running
+    process.exit();
 };
 
 //DELETE ALL DATA FROM THE COLLECTION
 const deleteData = async () => {
     try {
-        // await User.deleteMany();
         await Question.deleteMany();
         console.log('Data successfully deleted!');
     } catch (error) {

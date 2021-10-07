@@ -79,10 +79,6 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
-  userFound: {
-    type: Boolean,
-    default: false
-  }
   /*coinsWon: {
     type: Boolean,
     default: false

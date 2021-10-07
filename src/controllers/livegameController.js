@@ -323,13 +323,6 @@ exports.gameZone = catchAsync(async (req, res, next) => {
             user.questionsTimer = timer;
     
             user.gameInit = true;
-                
-            user.previousQuestion = -1;
-            user.gameEnded = false;
-            user.userFound = false;
-            user.firstQuestion = false;
-            // user.activeGames = [];
-            // user.currentGame = [];
 
             await user.save();
     
@@ -337,6 +330,16 @@ exports.gameZone = catchAsync(async (req, res, next) => {
             console.log(user.currentQuestion);
         }
     }
+    // INSTANCE 1
+    // This should not be there. Because of the reasons in STAR 1.
+    // So it has been commented out
+    // else if (currentTime < livegame.gameTime) {
+    //   console.log("3");
+    //   res.status(200).json({
+    //     status: "success",
+    //     message: "The game hasn't started yet.",
+    //   });
+    // }
   
     //******************************************* */
     // GAME ZONE: STEP 3
@@ -441,7 +444,6 @@ exports.gameZone = catchAsync(async (req, res, next) => {
             const userIndex = livegame.activeParticipants.indexOf(req.user._id);
             livegame.activeParticipants.splice(userIndex, 1);
             await livegame.save();
-
             console.log("6. Problem with answer")
             res.status(200).json({
                 status: "success",

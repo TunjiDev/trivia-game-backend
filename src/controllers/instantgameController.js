@@ -189,8 +189,6 @@ exports.gameZone = catchAsync(async (req, res, next) => {
             }
         
             console.log("4. Moved to Next question");
-            // console.log(instantGame.questions);
-            // console.log(instantGame[0]);
             
             res.status(200).json({
                 status: "success",
@@ -213,8 +211,6 @@ exports.gameZone = catchAsync(async (req, res, next) => {
             await user.save();
         
             console.log("3. question returned");
-            // console.log(instantGame[0].questions);
-            // console.log(instantGame[0]);
 
             res.status(200).json({
                 status: "success",
@@ -240,11 +236,9 @@ exports.gameZone = catchAsync(async (req, res, next) => {
                 const userIndex = instantGame[0].activePlayers.indexOf(user.id);
                 instantGame[0].activePlayers.splice(userIndex, 1);
                 await instantGame[0].save();
-                // console.log(instantGame[0]);
             }
         
             console.log("5. Answer submitted");
-            // console.log(instantGame[0].players);
         
             console.log(res.Body);
             res.status(200).json({
@@ -320,7 +314,6 @@ exports.gameZone = catchAsync(async (req, res, next) => {
             // user.gameInit = false;
         
             await user.save();
-            // await instantGame[0].save();
         
             console.log("9");
             res.status(200).json({
